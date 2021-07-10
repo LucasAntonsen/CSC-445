@@ -14,6 +14,7 @@ public class simplex {
         int num_lines = 1;
         int num_col = 1;
         int i = 0;
+        fsdafssagsd
 
         try (BufferedReader reader = new BufferedReader(new FileReader(input))) {
             String s = reader.readLine();
