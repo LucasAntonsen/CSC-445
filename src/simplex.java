@@ -10,50 +10,24 @@ import java.util.Scanner;
 public class simplex {
     //check it works on linux csc!!!!!!!!!
 
-    public static void input_parse(File input, float[][] table) {
-        int num_lines = 1;
-        int num_col = 1;
-        int i = 0;
-        fsdafssagsd
+    public static void fill_Table(File input, float[][] table, int num_rows) {
+        int row = 0;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(input))) {
-            String s = reader.readLine();
-            String[] str = s.split("\\s+");
-            num_col += str.length;
 
-            while (reader.readLine() != null) {
-                num_lines++;
-            }
+            while (row != num_rows) {
+                //System.out.println(row);
+                String line = reader.readLine();
+                String[] str = line.split("\\s+");
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("num_lines:" + num_lines + " num_col:" + num_col);
-
-
-        table = new float[num_lines][];
-
-        for(i = 0; i < num_lines; i++){
-            table[i] = new float[num_col];
-        }
-
-        try (BufferedReader reader2 = new BufferedReader(new FileReader(input))) {
-            String a = reader2.readLine();
-            int row = 0;
-
-            while (a != null) {
-                String[] str2 = a.split("\\s+");
-                for(i = 0; i < num_col; i++){
-                    table[row][i] = Float.parseFloat(str2[i]);
+                for(int i = 0; i < str.length; i++){
+                    table[row][i] = Float.parseFloat(str[i]);
                 }
                 row++;
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public static int row_Count(File input){
@@ -76,25 +50,37 @@ public class simplex {
             String s = reader.readLine();
             String[] str = s.split("\\s+");
             num_cols += str.length;
-
         } catch (IOException e) {
             e.printStackTrace();
         }
         return num_cols;
     }
 
-    //public static void print_Table(float[][] table){
-//        for(int i = 0; i <
-//    }
+    public static void print_Table(float[][] table, int num_rows){
+        for(int i = 0; i < num_rows; i++){
+            for(int y = 0; y < table[i].length; y++){
+                System.out.print(table[i][y] + " ");
+            }
+            System.out.println();
+        }
+    }
 
     public static void main(String[] args){
-        File inFile = null;
-        inFile = new File(args[0]);
+        File inFile = new File(args[0]);
 
-        float[][] table;
+        int rows = row_Count(inFile);
+        int cols = col_Count(inFile);
 
-        System.out.println("Number of rows: " + row_Count(inFile) + " Number of columns: " + col_Count(inFile));
+        System.out.println("Number of rows: " + rows + " Number of columns: " + cols);
 
-        //input_parse(inFile, table);
+        float[][] table = new float[rows][];
+
+        for(int i = 0; i < rows; i++){
+            table[i] = new float[cols];
+        }
+        //System.out.println(table[0][0]);
+
+        fill_Table(inFile, table, rows);
+        print_Table(table, rows);
     }
 }
