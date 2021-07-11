@@ -12,28 +12,28 @@ public class simplex {
 
     public static void fill_Table(File input, float[][] table, int num_rows) {
         int row = 0;
-        int length = 0;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(input))) {
 
             while (row != num_rows) {
-                //System.out.println(row);
                 String line = reader.readLine();
                 String[] str = line.split("\\s+");
 
                 if(row == 0){
                     table[0][0] = 0;
-                    length = str.length;
+                    for(int i = 0; i < str.length; i++){
+                        table[row][i + 1] = Float.parseFloat(str[i]);
+                    }
 
-                }else{
-                    table[row][0] = Float.parseFloat(str[str.length-1]);
-                    length = str.length - 1;
+                }else {
+                    table[row][0] = Float.parseFloat(str[str.length - 1]);
+
+                    for (int i = 0; i < str.length - 1; i++) {
+                        if(Float.parseFloat(str[i]) != 0){
+                            table[row][i + 1] = -1 * Float.parseFloat(str[i]);
+                        }
+                    }
                 }
-
-                for(int i = 0; i < length; i++){
-                    table[row][i+1] = Float.parseFloat(str[i]);
-                }
-
                 row++;
             }
         } catch (IOException e) {
@@ -83,6 +83,17 @@ public class simplex {
         }
     }
 
+    public static int enter_Select(float[][] table){
+        int idx = -1;
+        for(int x = 1; x < table[0].length; x++){
+            if(table[0][x] > 0){
+                idx = x;
+                break;
+            }
+        }
+        return idx;
+    }
+
     public static int[] gen(){
         int[] a = {1,2,3};
         return a;
@@ -123,8 +134,7 @@ public class simplex {
 
         print_Table(table, row_labels, col_labels, rows);
 
-        //generate_Dictionary();
-        int[] x = gen();
-        System.out.println(Arrays.toString(x));
+
+        System.out.println(enter_Select(table));
     }
 }
