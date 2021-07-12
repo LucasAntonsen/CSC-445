@@ -85,9 +85,9 @@ public class simplex {
 
     public static int enter_Select(float[][] table){
         int idx = -1;
-        for(int x = 1; x < table[0].length; x++){
-            if(table[0][x] > 0){
-                idx = x;
+        for(int y = 1; y < table[0].length; y++){
+            if(table[0][y] > 0){
+                idx = y;
                 break;
             }
         }
@@ -96,10 +96,10 @@ public class simplex {
 
     //bounds
     public static int leave_Select(float[][] table, int enter, int num_rows){
-        float min = -1;
+        float min;
         int leave = -1;
-        float val = 0;
-        int neg_entry[] = new int[num_rows];
+        float val;
+        int[] neg_entry = new int[num_rows];
         int idx = 0;
 
         for(int x = 1; x < num_rows; x++){
@@ -131,7 +131,7 @@ public class simplex {
         return leave;
     }
 
-    public static void pivot(float table[][], int enter_var, int leave_var, int num_rows, int num_cols,
+    public static void pivot(float[][] table, int enter_var, int leave_var, int num_rows, int num_cols,
                              String[] row_labels, String[] col_labels){
 
         float multiplier = -1 * table[leave_var][enter_var];
@@ -169,7 +169,10 @@ public class simplex {
         int rows = row_Count(inFile);
         int cols = col_Count(inFile);
 
-        int i = 0;
+        int i;
+
+        int entering_var;
+        int leaving_var;
 
         //System.out.println("Number of rows: " + rows + " Number of columns: " + cols);
 
@@ -197,17 +200,27 @@ public class simplex {
         //System.out.println(Arrays.toString(row_labels));
 
         print_Table(table, row_labels, col_labels, rows);
-        pivot(table, enter_Select(table), leave_Select(table, enter_Select(table), rows), rows, cols, row_labels, col_labels);
-        System.out.println();
-        print_Table(table, row_labels, col_labels, rows);
 
-//        while(solution is not unbounded){
-//            find entering variable
-//            find leaving variable
-//            pivot
-//        }
+        for(;;){
+            entering_var = enter_Select(table);
 
-//        System.out.println(enter_Select(table));
-//        System.out.println(leave_Select(table, enter_Select(table), rows));
+            if(entering_var == -1){
+                System.out.println("\nFinal table");
+                print_Table(table, row_labels, col_labels, rows);
+                break;
+            }
+
+            leaving_var = leave_Select(table, entering_var, rows);
+
+            if(leaving_var == -1){
+                System.out.println("Unbounded");
+                print_Table(table, row_labels, col_labels, rows);
+                break;
+            }
+
+            System.out.println();
+            pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
+            print_Table(table, row_labels, col_labels, rows);
+        }
     }
 }
