@@ -94,6 +94,43 @@ public class simplex {
         return idx;
     }
 
+    //bounds
+    public static int leave_Select(float[][] table, int enter, int num_rows){
+        float min = -1;
+        int leave = -1;
+        float val = 0;
+        int neg_entry[] = new int[num_rows];
+        int idx = 0;
+
+        for(int x = 1; x < num_rows; x++){
+            if(table[x][enter] < 0){
+                neg_entry[idx] = x;
+                idx++;
+            }
+        }
+        //System.out.println(Arrays.toString(neg_entry));
+       // System.out.println("idx " + idx);
+
+        if(neg_entry[0] == 0){
+            return leave;
+        }
+
+        min = table[neg_entry[0]][0]/(-1*table[neg_entry[0]][enter]);
+        //System.out.println("min " + min);
+        leave = neg_entry[0];
+
+        for(int i = 1; i < idx; i++){
+            val = table[neg_entry[i]][0]/(-1*table[neg_entry[i]][enter]);
+            //System.out.println("val " + val);
+            if(val < min){
+                min = val;
+                leave = neg_entry[i];
+            }
+        }
+
+        return leave;
+    }
+
     public static int[] gen(){
         int[] a = {1,2,3};
         return a;
@@ -107,7 +144,7 @@ public class simplex {
 
         int i = 0;
 
-        System.out.println("Number of rows: " + rows + " Number of columns: " + cols);
+        //System.out.println("Number of rows: " + rows + " Number of columns: " + cols);
 
         float[][] table = new float[rows][];
 
@@ -123,18 +160,19 @@ public class simplex {
         for(i = 1; i < cols; i++){
             col_labels[i] = "x" + i;
         }
-        System.out.println(Arrays.toString(col_labels));
+        //System.out.println(Arrays.toString(col_labels));
 
         String[] row_labels = new String[rows];
         row_labels[0] = "fi";
         for(i = 1; i < rows; i++){
             row_labels[i] = "w" + i;
         }
-        System.out.println(Arrays.toString(row_labels));
+        //System.out.println(Arrays.toString(row_labels));
 
         print_Table(table, row_labels, col_labels, rows);
 
 
-        System.out.println(enter_Select(table));
+//        System.out.println(enter_Select(table));
+//        System.out.println(leave_Select(table, enter_Select(table), rows));
     }
 }
