@@ -131,6 +131,30 @@ public class simplex {
         return leave;
     }
 
+    public static void pivot(float table[][], int enter_var, int leave_var, int num_rows, int num_cols,
+                             String[] row_labels, String[] col_labels){
+        //swap labels
+//        String copy = row_labels[enter_var];
+//        row_labels[enter_var] = col_labels[leave_var];
+//        col_labels[leave_var] = copy;
+
+        //just get coefficient big dooggggg
+        for(int y = 0; y < num_rows; y++){
+            if(y != enter_var){
+                table[leave_var][y] /= -1 * table[leave_var][enter_var];
+            }
+        }
+        table[leave_var][enter_var] = -1 / table[leave_var][enter_var];
+
+        for(int x = 0; x < num_rows; x++) {
+            if (x != leave_var) {
+                for (int y = 0; y < num_cols; y++) {
+                    table[x][y] = table[x][enter_var] * table[leave_var][y];
+                }
+            }        //table[x][y] = table
+        }
+    }
+
     public static int[] gen(){
         int[] a = {1,2,3};
         return a;
@@ -170,7 +194,9 @@ public class simplex {
         //System.out.println(Arrays.toString(row_labels));
 
         print_Table(table, row_labels, col_labels, rows);
-
+        pivot(table, enter_Select(table), leave_Select(table, enter_Select(table), rows), rows, cols, row_labels, col_labels);
+        System.out.println();
+        print_Table(table, row_labels, col_labels, rows);
 
 //        System.out.println(enter_Select(table));
 //        System.out.println(leave_Select(table, enter_Select(table), rows));
