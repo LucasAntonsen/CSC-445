@@ -133,31 +133,34 @@ public class simplex {
 
     public static void pivot(float table[][], int enter_var, int leave_var, int num_rows, int num_cols,
                              String[] row_labels, String[] col_labels){
-        //swap labels
-//        String copy = row_labels[enter_var];
-//        row_labels[enter_var] = col_labels[leave_var];
-//        col_labels[leave_var] = copy;
 
-        //just get coefficient big dooggggg
-        for(int y = 0; y < num_rows; y++){
+        float multiplier = -1 * table[leave_var][enter_var];
+        for(int y = 0; y < num_cols; y++){
             if(y != enter_var){
-                table[leave_var][y] /= -1 * table[leave_var][enter_var];
+                table[leave_var][y] /= multiplier;
+            }else{
+                table[leave_var][enter_var] = -1 / multiplier;
             }
         }
-        table[leave_var][enter_var] = -1 / table[leave_var][enter_var];
 
         for(int x = 0; x < num_rows; x++) {
             if (x != leave_var) {
-                for (int y = 0; y < num_cols; y++) {
-                    table[x][y] = table[x][enter_var] * table[leave_var][y];
-                }
-            }        //table[x][y] = table
-        }
-    }
 
-    public static int[] gen(){
-        int[] a = {1,2,3};
-        return a;
+                multiplier = table[x][enter_var];
+
+                for (int y = 0; y < num_cols; y++) {
+                    if(y != enter_var){
+                        //System.out.println("x: " + x + " y: " + y + " factor: " + multiplier + "*" + table[leave_var][y]);
+                        table[x][y] += multiplier * table[leave_var][y];
+                    }else{
+                        table[x][y] = multiplier * table[leave_var][y];
+                    }
+                }
+            }
+        }
+        String copy = row_labels[leave_var];
+        row_labels[leave_var] = col_labels[enter_var];
+        col_labels[enter_var] = copy;
     }
 
     public static void main(String[] args){
@@ -197,6 +200,12 @@ public class simplex {
         pivot(table, enter_Select(table), leave_Select(table, enter_Select(table), rows), rows, cols, row_labels, col_labels);
         System.out.println();
         print_Table(table, row_labels, col_labels, rows);
+
+//        while(solution is not unbounded){
+//            find entering variable
+//            find leaving variable
+//            pivot
+//        }
 
 //        System.out.println(enter_Select(table));
 //        System.out.println(leave_Select(table, enter_Select(table), rows));
