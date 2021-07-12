@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import static java.lang.System.exit;
+
 public class simplex {
     //check it works on linux csc!!!!!!!!!
 
@@ -163,6 +165,36 @@ public class simplex {
         col_labels[enter_var] = copy;
     }
 
+    public static int check_Feasibility(float[][] table, int num_rows){
+        for(int x = 1; x < num_rows; x++){
+            if(table[x][0] < 0){
+                return -1;
+            }
+        }
+        return 1;
+    }
+
+    public static void print_soln(float[][] table, String[] row_labels, int num_rows, String[] col_labels, int num_cols){
+        int[] x_indices = new int[num_cols - 1];
+        int index;
+
+        for(int x = 1; x < num_rows; x++){
+            if(row_labels[x].matches("^x\\d+")){
+                index = Integer.parseInt(row_labels[x].replaceAll("[^0-9]", "")) - 1;
+                x_indices[index] = -x;
+            }
+        }
+
+        for(int y = 1; y < num_cols; y++){
+            if(col_labels[y].matches("^x\\d+")){
+                index = Integer.parseInt(row_labels[y].replaceAll("[^0-9]", "")) - 1;
+                x_indices[index] = y;
+            }
+        }
+
+        System.out.println(Arrays.toString(x_indices));
+    }
+
     public static void main(String[] args){
         File inFile = new File(args[0]);
 
@@ -199,7 +231,12 @@ public class simplex {
         }
         //System.out.println(Arrays.toString(row_labels));
 
-        print_Table(table, row_labels, col_labels, rows);
+        //print_Table(table, row_labels, col_labels, rows);
+
+        if(check_Feasibility(table, rows) == -1){
+            System.out.println("infeasible");
+            exit(0);
+        }
 
         for(;;){
             entering_var = enter_Select(table);
@@ -218,9 +255,10 @@ public class simplex {
                 break;
             }
 
-            System.out.println();
+//            System.out.println();
             pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
-            print_Table(table, row_labels, col_labels, rows);
+//            print_Table(table, row_labels, col_labels, rows);
         }
+        print_soln(table, row_labels, rows, col_labels, cols);
     }
 }
