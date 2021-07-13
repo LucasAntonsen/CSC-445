@@ -235,11 +235,30 @@ public class simplex {
         return leave;
     }
 
-    public static void redefine_Obj_Function(int num_rows){
-        for(int y = 1; y < num_rows; y++){
-            if(col_labels[y].matches(obj_labels[y])){
+    public static void redefine_Obj_Function(float[][] table, int num_rows, int num_cols, String[] row_labels, String[] col_labels,
+                                             String[] obj_labels, float[] obj_func){
+        int found;
 
+        for(int i = 1; i < num_cols - 1; i++) {
+            found = 0;
+
+            for (int y = 1; y < num_cols - 1; y++) {
+                if (col_labels[y].matches(obj_labels[i])) {
+                    table[0][y] += obj_func[i];
+                    found = 1;
+                }
             }
+            if(found != 1){
+                for(int x = 1; x < num_rows; x++){
+                    if(row_labels[x].matches(obj_labels[i])){
+
+                        for(int idx = 0; idx < num_cols; idx++){
+                            table[0][idx] += obj_func[i] * table[x][idx];
+                        }
+                    }
+                }
+            }
+
         }
     }
 
@@ -283,10 +302,13 @@ public class simplex {
         //print_Table(table, row_labels, col_labels, rows);
 
         if(check_Feasibility(table, rows) == -1){
-            float[] obj_func = table[0];
-            String[] cur_labels = col_labels;
-            //System.out.println(Arrays.toString(cur_labels));
-            //System.out.println(Arrays.toString(obj_func));
+            float[] obj_func = new float[cols];
+            String[] cur_labels = new String[cols];
+            System.arraycopy(table[0], 0, obj_func, 0, cols);
+            System.arraycopy(col_labels, 0, cur_labels, 0, cols);
+
+            System.out.println(Arrays.toString(cur_labels));
+            System.out.println(Arrays.toString(obj_func));
 
             entering_var = cols - 1;
             leaving_var = auxiliary_Select(table, rows, cols, row_labels, col_labels);
@@ -323,8 +345,14 @@ public class simplex {
             for(int x = 0; x < rows; x++){
                 table[x][cols - 1] = 0;
             }
+            System.out.println();
             print_Table(table, row_labels, col_labels, rows);
+
+            System.out.println(Arrays.toString(cur_labels));
+            System.out.println(Arrays.toString(obj_func));
             System.out.println("feasible");
+            redefine_Obj_Function(table, rows, cols, row_labels, col_labels, cur_labels, obj_func);
+            print_Table(table, row_labels, col_labels, rows);
             exit(0);
         }
 
