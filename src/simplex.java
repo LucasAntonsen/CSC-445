@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -175,31 +176,50 @@ public class simplex {
     }
 
     public static void print_soln(float[][] table, String[] row_labels, int num_rows, String[] col_labels, int num_cols){
-        int[] x_indices = new int[num_cols - 1];
+        int[] x_indices = new int[num_cols - 2]; //-2 for omega and obs
         int index;
 
         for(int x = 1; x < num_rows; x++){
             if(row_labels[x].matches("^x\\d+")){
                 index = Integer.parseInt(row_labels[x].replaceAll("[^0-9]", "")) - 1;
-                x_indices[index] = -x;
+                x_indices[index] = x;
             }
         }
 
         for(int y = 1; y < num_cols; y++){
             if(col_labels[y].matches("^x\\d+")){
                 index = Integer.parseInt(row_labels[y].replaceAll("[^0-9]", "")) - 1;
-                x_indices[index] = y;
+                x_indices[index] = -y;
             }
         }
+        //System.out.println(Arrays.toString(x_indices));
 
-        System.out.println(Arrays.toString(x_indices));
+        System.out.println("optimal");
+
+        DecimalFormat format = new DecimalFormat("#.#######");
+
+        System.out.print(format.format(table[0][0]) + "\n");
+        for(int i = 0; i < num_cols - 2; i++){
+            if(x_indices[i] < 0){
+                System.out.print(0 + " ");
+            }else if(i == num_rows - 2) {
+                System.out.print(format.format(table[x_indices[i]][0]));
+            }else{
+                System.out.print(format.format(table[x_indices[i]][0]) + " ");
+            }
+        }
+        //System.out.printf(format.format(3000000.12356788));
+    }
+
+    public static void auxiliary_Pivot(){
+
     }
 
     public static void main(String[] args){
         File inFile = new File(args[0]);
 
         int rows = row_Count(inFile);
-        int cols = col_Count(inFile);
+        int cols = col_Count(inFile) + 1; //including omega place
 
         int i;
 
@@ -211,7 +231,7 @@ public class simplex {
         float[][] table = new float[rows][];
 
         for(i = 0; i < rows; i++){
-            table[i] = new float[cols];
+            table[i] = new float[cols]; //
         }
         //System.out.println(table[0][0]);
 
@@ -222,6 +242,7 @@ public class simplex {
         for(i = 1; i < cols; i++){
             col_labels[i] = "x" + i;
         }
+        col_labels[cols - 1] = "omega";
         //System.out.println(Arrays.toString(col_labels));
 
         String[] row_labels = new String[rows];
@@ -231,7 +252,7 @@ public class simplex {
         }
         //System.out.println(Arrays.toString(row_labels));
 
-        //print_Table(table, row_labels, col_labels, rows);
+        print_Table(table, row_labels, col_labels, rows);
 
         if(check_Feasibility(table, rows) == -1){
             System.out.println("infeasible");
@@ -250,7 +271,7 @@ public class simplex {
             leaving_var = leave_Select(table, entering_var, rows);
 
             if(leaving_var == -1){
-                System.out.println("Unbounded");
+                System.out.println("unbounded");
                 print_Table(table, row_labels, col_labels, rows);
                 break;
             }
