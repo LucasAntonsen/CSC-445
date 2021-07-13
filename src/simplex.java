@@ -124,7 +124,7 @@ public class simplex {
 
         for(int i = 1; i < idx; i++){
             val = table[neg_entry[i]][0]/(-1*table[neg_entry[i]][enter]);
-            //System.out.println("val " + val);
+            System.out.println("val " + val);
             if(val < min){
                 min = val;
                 leave = neg_entry[i];
@@ -211,8 +211,28 @@ public class simplex {
         //System.out.printf(format.format(3000000.12356788));
     }
 
-    public static void auxiliary_Pivot(){
+    public static int auxiliary_Select(float[][] table, int num_rows, int num_cols, String[] row_labels, String[] col_labels){
+        float max = 0;
+        int leave = 0;
 
+        for(int y = 0; y < num_cols - 1; y++){
+            table[0][y] = 0;
+        }
+        table[0][num_cols - 1] = -1;
+
+        for(int x = 1; x < num_rows; x++){
+            table[x][num_cols - 1] = 1;
+
+            if(table[x][0] < 0 && max < -1 * table[x][0]){
+                max = -1 * table[x][0];
+                leave = x;
+            }
+        }
+        //System.out.println(leave + " " + max);
+
+        print_Table(table, row_labels, col_labels, num_rows);
+        System.out.println();
+        return leave;
     }
 
     public static void main(String[] args){
@@ -252,10 +272,47 @@ public class simplex {
         }
         //System.out.println(Arrays.toString(row_labels));
 
-        print_Table(table, row_labels, col_labels, rows);
+        //print_Table(table, row_labels, col_labels, rows);
 
         if(check_Feasibility(table, rows) == -1){
-            System.out.println("infeasible");
+            float[] obj_func = table[0];
+            String[] cur_labels = col_labels;
+            //System.out.println(Arrays.toString(cur_labels));
+            //System.out.println(Arrays.toString(obj_func));
+
+            entering_var = cols - 1;
+            leaving_var = auxiliary_Select(table, rows, cols, row_labels, col_labels);
+
+            pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
+            print_Table(table, row_labels, col_labels, rows);
+
+            for(;;){
+                entering_var = enter_Select(table);
+
+                if(entering_var == -1){
+                    System.out.println("\nFinal table");
+                    print_Table(table, row_labels, col_labels, rows);
+                    break;
+                }
+
+                leaving_var = leave_Select(table, entering_var, rows);
+
+                if(leaving_var == -1){
+                    System.out.println("unbounded");
+                    print_Table(table, row_labels, col_labels, rows);
+                    break;
+                }
+
+                pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
+            }
+
+            for(int y = 0; y < cols; y++){
+                if(table[0][y] != 0 && !col_labels[y].matches("omega")|| table[0][y] != -1 && col_labels[y].matches("omega")){
+                    System.out.println("infeasible");
+                    exit(0);
+                }
+            }
+            System.out.println("feasible");
             exit(0);
         }
 
