@@ -124,7 +124,7 @@ public class simplex {
 
         for(int i = 1; i < idx; i++){
             val = table[neg_entry[i]][0]/(-1*table[neg_entry[i]][enter]);
-            System.out.println("val " + val);
+            //System.out.println("val " + val);
             if(val < min){
                 min = val;
                 leave = neg_entry[i];
@@ -230,8 +230,8 @@ public class simplex {
         }
         //System.out.println(leave + " " + max);
 
-        print_Table(table, row_labels, col_labels, num_rows);
-        System.out.println();
+        //print_Table(table, row_labels, col_labels, num_rows);
+        //System.out.println();
         return leave;
     }
 
@@ -307,21 +307,21 @@ public class simplex {
             System.arraycopy(table[0], 0, obj_func, 0, cols);
             System.arraycopy(col_labels, 0, cur_labels, 0, cols);
 
-            System.out.println(Arrays.toString(cur_labels));
-            System.out.println(Arrays.toString(obj_func));
+            //System.out.println(Arrays.toString(cur_labels));
+            //System.out.println(Arrays.toString(obj_func));
 
             entering_var = cols - 1;
             leaving_var = auxiliary_Select(table, rows, cols, row_labels, col_labels);
 
             pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
-            print_Table(table, row_labels, col_labels, rows);
+            //print_Table(table, row_labels, col_labels, rows);
 
             for(;;){
                 entering_var = enter_Select(table);
 
                 if(entering_var == -1){
-                    System.out.println("\nFinal table");
-                    print_Table(table, row_labels, col_labels, rows);
+                    //System.out.println("\nFinal table");
+                    //print_Table(table, row_labels, col_labels, rows);
                     break;
                 }
 
@@ -329,7 +329,7 @@ public class simplex {
 
                 if(leaving_var == -1){
                     System.out.println("unbounded");
-                    print_Table(table, row_labels, col_labels, rows);
+                    //print_Table(table, row_labels, col_labels, rows);
                     break;
                 }
 
@@ -345,23 +345,23 @@ public class simplex {
             for(int x = 0; x < rows; x++){
                 table[x][cols - 1] = 0;
             }
-            System.out.println();
-            print_Table(table, row_labels, col_labels, rows);
-
-            System.out.println(Arrays.toString(cur_labels));
-            System.out.println(Arrays.toString(obj_func));
-            System.out.println("feasible");
+//            System.out.println();
+//            print_Table(table, row_labels, col_labels, rows);
+//
+//            System.out.println(Arrays.toString(cur_labels));
+//            System.out.println(Arrays.toString(obj_func));
+//            System.out.println("feasible");
             redefine_Obj_Function(table, rows, cols, row_labels, col_labels, cur_labels, obj_func);
-            print_Table(table, row_labels, col_labels, rows);
-            exit(0);
+            //print_Table(table, row_labels, col_labels, rows);
+            //exit(0);
         }
 
         for(;;){
             entering_var = enter_Select(table);
 
             if(entering_var == -1){
-                System.out.println("\nFinal table");
-                print_Table(table, row_labels, col_labels, rows);
+                //System.out.println("\nFinal table");
+                //print_Table(table, row_labels, col_labels, rows);
                 break;
             }
 
@@ -369,7 +369,7 @@ public class simplex {
 
             if(leaving_var == -1){
                 System.out.println("unbounded");
-                print_Table(table, row_labels, col_labels, rows);
+                //print_Table(table, row_labels, col_labels, rows);
                 break;
             }
 
