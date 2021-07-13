@@ -235,6 +235,14 @@ public class simplex {
         return leave;
     }
 
+    public static void redefine_Obj_Function(int num_rows){
+        for(int y = 1; y < num_rows; y++){
+            if(col_labels[y].matches(obj_labels[y])){
+
+            }
+        }
+    }
+
     public static void main(String[] args){
         File inFile = new File(args[0]);
 
@@ -312,6 +320,10 @@ public class simplex {
                     exit(0);
                 }
             }
+            for(int x = 0; x < rows; x++){
+                table[x][cols - 1] = 0;
+            }
+            print_Table(table, row_labels, col_labels, rows);
             System.out.println("feasible");
             exit(0);
         }
