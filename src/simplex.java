@@ -3,11 +3,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
 
+import static java.lang.Math.abs;
 import static java.lang.System.exit;
 
 public class simplex {
@@ -90,7 +87,7 @@ public class simplex {
     public static int enter_Select(float[][] table){
         int idx = -1;
         for(int y = 1; y < table[0].length; y++){
-            if(table[0][y] > 0){
+            if(table[0][y] > 0.00000001){
                 idx = y;
                 break;
             }
@@ -107,7 +104,7 @@ public class simplex {
         int idx = 0;
 
         for(int x = 1; x < num_rows; x++){
-            if(table[x][enter] < 0){
+            if(table[x][enter] <=-0.0000001){
                 neg_entry[idx] = x;
                 idx++;
             }
@@ -332,10 +329,12 @@ public class simplex {
 
                 leaving_var = leave_Select(table, entering_var, rows, row_labels);
 
+                System.out.println("entering variable and leaving variable " + entering_var + "    " + leaving_var);
+
                 if(leaving_var == -1){
-                    System.out.println("unbounded");
                     print_Table(table, row_labels, col_labels, rows);
-                    break;
+                    System.out.println("unbounded");//should it be unbounded or infeasible?
+                    exit(0);
                 }
 
                 pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
@@ -347,7 +346,7 @@ public class simplex {
                 if(match_omega){
                     omega = y;
                 }
-                if(table[0][y] != 0 && !col_labels[y].matches("omega")|| table[0][y] != -1 && match_omega){
+                if(table[0][y] <= -0.0000001 && !col_labels[y].matches("omega")|| table[0][y] != -1 && match_omega){
                     System.out.println("infeasible");
                     exit(0);
                 }
@@ -378,9 +377,9 @@ public class simplex {
             leaving_var = leave_Select(table, entering_var, rows, row_labels);
 
             if(leaving_var == -1){
-                System.out.println("unbounded");
                 print_Table(table, row_labels, col_labels, rows);
-                break;
+                System.out.println("unbounded");
+                exit(0);
             }
 
 //            System.out.println();
