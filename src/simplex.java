@@ -273,6 +273,8 @@ public class simplex {
 
         int entering_var;
         int leaving_var;
+        int omega = 0;
+        boolean match_omega;
 
         //System.out.println("Number of rows: " + rows + " Number of columns: " + cols);
 
@@ -340,22 +342,27 @@ public class simplex {
             }
 
             for(int y = 0; y < cols; y++){
-                if(table[0][y] != 0 && !col_labels[y].matches("omega")|| table[0][y] != -1 && col_labels[y].matches("omega")){
+                match_omega = col_labels[y].matches("omega");
+
+                if(match_omega){
+                    omega = y;
+                }
+                if(table[0][y] != 0 && !col_labels[y].matches("omega")|| table[0][y] != -1 && match_omega){
                     System.out.println("infeasible");
                     exit(0);
                 }
             }
             for(int x = 0; x < rows; x++){
-                table[x][cols - 1] = 0;
+                table[x][omega] = 0;
             }
 //            System.out.println();
-//            print_Table(table, row_labels, col_labels, rows);
+            print_Table(table, row_labels, col_labels, rows);
 //
 //            System.out.println(Arrays.toString(cur_labels));
 //            System.out.println(Arrays.toString(obj_func));
 //            System.out.println("feasible");
             redefine_Obj_Function(table, rows, cols, row_labels, col_labels, cur_labels, obj_func);
-            //print_Table(table, row_labels, col_labels, rows);
+            print_Table(table, row_labels, col_labels, rows);
             //exit(0);
         }
 
@@ -372,13 +379,13 @@ public class simplex {
 
             if(leaving_var == -1){
                 System.out.println("unbounded");
-                //print_Table(table, row_labels, col_labels, rows);
+                print_Table(table, row_labels, col_labels, rows);
                 break;
             }
 
 //            System.out.println();
             pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
-//            print_Table(table, row_labels, col_labels, rows);
+            print_Table(table, row_labels, col_labels, rows);
         }
         print_soln(table, row_labels, rows, col_labels, cols);
     }
