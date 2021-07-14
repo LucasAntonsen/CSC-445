@@ -84,6 +84,7 @@ public class simplex {
             }
             System.out.println();
         }
+        System.out.println();
     }
 
     public static int enter_Select(float[][] table){
@@ -98,7 +99,7 @@ public class simplex {
     }
 
     //bounds
-    public static int leave_Select(float[][] table, int enter, int num_rows){
+    public static int leave_Select(float[][] table, int enter, int num_rows, String[] row_labels){
         float min;
         int leave = -1;
         float val;
@@ -125,7 +126,7 @@ public class simplex {
         for(int i = 1; i < idx; i++){
             val = table[neg_entry[i]][0]/(-1*table[neg_entry[i]][enter]);
             //System.out.println("val " + val);
-            if(val < min){
+            if(val < min || val == min && row_labels[neg_entry[i]].matches("omega")){
                 min = val;
                 leave = neg_entry[i];
             }
@@ -188,7 +189,7 @@ public class simplex {
 
         for(int y = 1; y < num_cols; y++){
             if(col_labels[y].matches("^x\\d+")){
-                index = Integer.parseInt(row_labels[y].replaceAll("[^0-9]", "")) - 1;
+                index = Integer.parseInt(col_labels[y].replaceAll("[^0-9]", "")) - 1;
                 x_indices[index] = -y;
             }
         }
@@ -199,10 +200,10 @@ public class simplex {
         DecimalFormat format = new DecimalFormat("#.#######");
 
         System.out.print(format.format(table[0][0]) + "\n");
-        for(int i = 0; i < num_cols - 2; i++){
+        for(int i = 0; i < x_indices.length; i++){
             if(x_indices[i] < 0){
                 System.out.print(0 + " ");
-            }else if(i == num_rows - 2) {
+            }else if(i == x_indices.length - 1) {
                 System.out.print(format.format(table[x_indices[i]][0]));
             }else{
                 System.out.print(format.format(table[x_indices[i]][0]) + " ");
@@ -228,7 +229,7 @@ public class simplex {
                 leave = x;
             }
         }
-        //System.out.println(leave + " " + max);
+        System.out.println(leave + " " + max);
 
         //print_Table(table, row_labels, col_labels, num_rows);
         //System.out.println();
@@ -299,7 +300,7 @@ public class simplex {
         }
         //System.out.println(Arrays.toString(row_labels));
 
-        //print_Table(table, row_labels, col_labels, rows);
+        print_Table(table, row_labels, col_labels, rows);
 
         if(check_Feasibility(table, rows) == -1){
             float[] obj_func = new float[cols];
@@ -312,24 +313,26 @@ public class simplex {
 
             entering_var = cols - 1;
             leaving_var = auxiliary_Select(table, rows, cols, row_labels, col_labels);
+            print_Table(table, row_labels, col_labels, rows);
 
             pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
-            //print_Table(table, row_labels, col_labels, rows);
+            print_Table(table, row_labels, col_labels, rows);
+            //System.out.println();
 
             for(;;){
                 entering_var = enter_Select(table);
 
                 if(entering_var == -1){
-                    //System.out.println("\nFinal table");
-                    //print_Table(table, row_labels, col_labels, rows);
+                    //System.out.println();
+                    print_Table(table, row_labels, col_labels, rows);
                     break;
                 }
 
-                leaving_var = leave_Select(table, entering_var, rows);
+                leaving_var = leave_Select(table, entering_var, rows, row_labels);
 
                 if(leaving_var == -1){
                     System.out.println("unbounded");
-                    //print_Table(table, row_labels, col_labels, rows);
+                    print_Table(table, row_labels, col_labels, rows);
                     break;
                 }
 
@@ -365,7 +368,7 @@ public class simplex {
                 break;
             }
 
-            leaving_var = leave_Select(table, entering_var, rows);
+            leaving_var = leave_Select(table, entering_var, rows, row_labels);
 
             if(leaving_var == -1){
                 System.out.println("unbounded");
