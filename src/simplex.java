@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 
@@ -52,7 +49,7 @@ public class simplex {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("num rows: " + num_rows);
+        //System.out.println("num rows: " + num_rows);
         return num_rows;
     }
 
@@ -66,7 +63,7 @@ public class simplex {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("num cols: " + num_cols);
+        //System.out.println("num cols: " + num_cols);
         return num_cols;
     }
 
@@ -340,8 +337,37 @@ public class simplex {
         }
     }
 
+    public static File create_File(){
+        BufferedReader br;
+        File input = new File("input.txt");
+
+        int flag = 1;
+
+        try {
+            FileWriter writer = new FileWriter(input);
+
+            br = new BufferedReader(new InputStreamReader(System.in));
+            String str = br.readLine();
+
+            while (str != null) {
+                if(flag == 1){
+                    writer.write(str);
+                    flag = 0;
+                }else{
+                    writer.write("\n" + str);
+                }
+                str = br.readLine();
+            }
+            writer.close();
+        }
+        catch (IOException e) {
+            System.out.println(e);
+        }
+        return input;
+    }
+
     public static void main(String[] args){
-        File inFile = new File(args[0]);
+        File inFile = create_File();
 
         int rows = row_Count(inFile);
         int cols = col_Count(inFile) + 1; //including omega place
@@ -467,7 +493,7 @@ public class simplex {
             pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
            // print_Table(table, row_labels, col_labels, rows);
         }
-        print_Table(table, row_labels, col_labels, rows);
+        //print_Table(table, row_labels, col_labels, rows);
         print_soln(table, row_labels, rows, col_labels, cols);
     }
 }
