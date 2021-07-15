@@ -52,6 +52,7 @@ public class simplex {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("num rows: " + num_rows);
         return num_rows;
     }
 
@@ -65,6 +66,7 @@ public class simplex {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("num cols: " + num_cols);
         return num_cols;
     }
 
@@ -348,8 +350,8 @@ public class simplex {
 
         int entering_var;
         int leaving_var;
-        int omega = 0;
-        boolean match_omega;
+
+        //while()
 
         //System.out.println("Number of rows: " + rows + " Number of columns: " + cols);
 
@@ -398,7 +400,7 @@ public class simplex {
 
             for(;;){
 
-                entering_var = largest_Coef_Select(table);
+                entering_var = enter_Select(table);//largest_Coef_Select(table);
 
                 if(entering_var == -1){
                     //System.out.println();
@@ -420,7 +422,7 @@ public class simplex {
             }
 
             //System.out.println();
-            print_Table(table, row_labels, col_labels, rows);
+            //print_Table(table, row_labels, col_labels, rows);
             if(Math.abs(table[0][0]) > 1e-7){
                 System.out.println("infeasible");
                 exit(0);
@@ -445,7 +447,7 @@ public class simplex {
         }
 
         for(;;){
-            entering_var = largest_Coef_Select(table);
+            entering_var = enter_Select(table);//largest_Coef_Select(table);
 
             if(entering_var == -1){
                 //System.out.println("\nFinal table");
@@ -465,6 +467,7 @@ public class simplex {
             pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
            // print_Table(table, row_labels, col_labels, rows);
         }
+        print_Table(table, row_labels, col_labels, rows);
         print_soln(table, row_labels, rows, col_labels, cols);
     }
 }
