@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 
 import static java.lang.System.exit;
 
@@ -257,7 +258,7 @@ public class simplex {
                 leave = x;
             }
         }
-        System.out.println(leave + " " + max);
+        //System.out.println(leave + " " + max);
 
         //print_Table(table, row_labels, col_labels, num_rows);
         //System.out.println();
@@ -291,17 +292,50 @@ public class simplex {
         }
     }
 
-    public static int special_Select(double[][] table, int enter_var, int leave_var, int num_rows, int num_cols,
-                                      String[] row_labels, String[] col_labels){
-        double max = Double.MAX_VALUE;
-        int index = -1;
+    public static int special_Select(double[][] table, int leave_var, int num_cols){
+        double max = 0;
+        int index = -5;
         for(int y = 1; y < num_cols; y++){
-            if(table[leave_var][y] < max && table[leave_var][y] < 0){
+           // System.out.println(table[leave_var][y]);
+            if(table[leave_var][y] > max){
                 max = table[leave_var][y];
                 index = y;
             }
         }
         return index;
+    }
+
+    public static int find_Omega(String[] row_labels, String[] col_labels, int num_rows, int num_cols){
+        boolean match;
+
+        //System.out.println(Arrays.toString(row_labels));
+        //System.out.println(Arrays.toString(col_labels));
+
+        for(int y = 1; y < num_cols; y++) {
+            match = col_labels[y].matches("omega");
+            if (match) {
+                //System.out.println("non basis");
+                return y;//positive value means it is in non-basis
+            }
+        }
+
+        for(int x = 1; x < num_rows; x++) {
+            match = row_labels[x].matches("omega");
+            //System.out.println(x + " " + row_labels[x]);
+            if (match) {
+                //System.out.println("basis" + x);
+                return -x;//negative value means in basis
+            }
+        }
+       // System.out.print("uh ohhhhh");
+        //exit(0);
+        return -1;
+    }
+
+    public static void delete_Omega(double[][] table, int omega_idx, int num_rows){
+        for(int x = 0; x < num_rows; x++){
+            table[x][omega_idx] = 0;
+        }
     }
 
     public static void main(String[] args){
@@ -343,7 +377,7 @@ public class simplex {
         }
         //System.out.println(Arrays.toString(row_labels));
 
-        print_Table(table, row_labels, col_labels, rows);
+        //print_Table(table, row_labels, col_labels, rows);
 
         if(check_Feasibility(table, rows) == -1){
             double[] obj_func = new double[cols];
@@ -356,40 +390,28 @@ public class simplex {
 
             entering_var = cols - 1;
             leaving_var = auxiliary_Select(table, rows, cols, row_labels, col_labels);
-            print_Table(table, row_labels, col_labels, rows);
+            //print_Table(table, row_labels, col_labels, rows);
 
             pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
-            print_Table(table, row_labels, col_labels, rows);
+            //Table(table, row_labels, col_labels, rows);
             //System.out.println();
 
             for(;;){
-                if(Math.abs(table[0][0]) < 1e-7){
-                    for(int y = 1; y < cols; y++) {
-                        match_omega = col_labels[y].matches("omega");
-                        if (match_omega) {
-                            omega = y;
-                            break;
-                        }
-                    }
-                    print_Table(table, row_labels, col_labels, rows);
-                    exit(0);
-                }
-
 
                 entering_var = largest_Coef_Select(table);
 
                 if(entering_var == -1){
                     //System.out.println();
-                    print_Table(table, row_labels, col_labels, rows);
+                   // print_Table(table, row_labels, col_labels, rows);
                     break;
                 }
 
                 leaving_var = leave_Select(table, entering_var, rows, row_labels);
 
-                System.out.println("entering variable and leaving variable " + entering_var + "    " + leaving_var);
+                //System.out.println("entering variable and leaving variable " + entering_var + "    " + leaving_var);
 
                 if(leaving_var == -1){
-                    print_Table(table, row_labels, col_labels, rows);
+                    //print_Table(table, row_labels, col_labels, rows);
                     System.out.println("unbounded");//should it be unbounded or infeasible?
                     exit(0);
                 }
@@ -397,58 +419,28 @@ public class simplex {
                 pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
             }
 
-            if(table[0][0] < 0){
-                for(int y = 1; y < cols; y++) {
-                    match_omega = col_labels[y].matches("omega");
-                    if (match_omega) {
-                        omega = y;
-                    }
-                }
-                if(omega == 0) {
-                    for (int x = 1; x < rows; x++) {
-                        match_omega = row_labels[x].matches("omega");
-                        if (match_omega) {
-                            omega = -x;
-                        }
-                    }
-                }
-            }else{
+            //System.out.println();
+            print_Table(table, row_labels, col_labels, rows);
+            if(Math.abs(table[0][0]) > 1e-7){
                 System.out.println("infeasible");
                 exit(0);
             }
 
-            if(omega > 0){
-                for(int x = 0; x < rows; x++){
-                    table[x][omega] = 0;
-                }
+            int omega_location = find_Omega(row_labels, col_labels, rows, cols);
+
+            if(omega_location < 0){
+                entering_var = special_Select(table, -omega_location, cols);
+                pivot(table, entering_var, -1 * omega_location, rows, cols, row_labels, col_labels);
+                //print_Table(table, row_labels, col_labels, rows);
+                int new_omega_loc = find_Omega(row_labels, col_labels, rows, cols);
+                delete_Omega(table, new_omega_loc, rows);
             }else{
-                for(int y = 1; y < cols; y++){
-                    if(table[0][y] < 0){
-                        double max = table[-omega][y];
-                        pivot(table, y, -omega, rows, cols, row_labels, col_labels);
-                        break;
-                    }
-                }
-                print_Table(table, row_labels, col_labels, rows);
-                exit(0);
-                for(int y = 1; y < cols; y++) {
-                    match_omega = col_labels[y].matches("omega");
-                    if (match_omega) {
-                        omega = y;
-                    }
-                }
-                for(int x = 0; x < rows; x++){
-                    table[x][-omega] = 0;
-                }
+                delete_Omega(table, omega_location, rows);
             }
-            System.out.println();
-            print_Table(table, row_labels, col_labels, rows);
-//
-//            System.out.println(Arrays.toString(cur_labels));
-//            System.out.println(Arrays.toString(obj_func));
-//            System.out.println("feasible");
+            //print_Table(table, row_labels, col_labels, rows);
+
             redefine_Obj_Function(table, rows, cols, row_labels, col_labels, cur_labels, obj_func);
-            print_Table(table, row_labels, col_labels, rows);
+           // print_Table(table, row_labels, col_labels, rows);
             //exit(0);
         }
 
@@ -464,14 +456,14 @@ public class simplex {
             leaving_var = leave_Select(table, entering_var, rows, row_labels);
 
             if(leaving_var == -1){
-                print_Table(table, row_labels, col_labels, rows);
+               // print_Table(table, row_labels, col_labels, rows);
                 System.out.println("unbounded");
                 exit(0);
             }
 
 //            System.out.println();
             pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
-            print_Table(table, row_labels, col_labels, rows);
+           // print_Table(table, row_labels, col_labels, rows);
         }
         print_soln(table, row_labels, rows, col_labels, cols);
     }
