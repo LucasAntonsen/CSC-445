@@ -424,7 +424,7 @@ public class simplex {
 
         for(int i = 0; i < degen_cand.length; i++){
             double val = table[degen_cand[i]][index]/table[degen_cand[i]][entering_var];
-            System.out.println(val);
+            //System.out.println(val);
 
             if(val > max){
                 max = val;
@@ -436,7 +436,7 @@ public class simplex {
                 max_cand[max_cand_idx++] = i;
             }
         }
-        System.out.println(Arrays.toString(max_cand));
+        //System.out.println(Arrays.toString(max_cand));
         return max_cand;
     }
 
@@ -451,7 +451,7 @@ public class simplex {
         if(degen_var == null){
             return leave_Select(table, entering_var, num_rows, row_labels);
         }
-        System.out.println(Arrays.toString(degen_var));
+        //System.out.println(Arrays.toString(degen_var));
         for(int y = 1; y < num_cols; y++){
             lexi_choice = find_Max(table, degen_var, y, entering_var);
             if(lexi_choice[1] == 0){
@@ -465,13 +465,15 @@ public class simplex {
 
     public static void main(String[] args){
         int bonus = 0;
-        if(args[0].matches("bonus")){
-            bonus = 1;
+        if(args.length == 1){
+            if(args[0].matches("bonus")){
+                bonus = 1;
+            }
         }
 
-        double[][] a = {{1,-2,3,5},
-                        {0,-2,2,7},
-                        {0,-2,2,8}};
+//        double[][] a = {{1,-2,3,5},
+//                        {0,-2,2,7},
+//                        {0,-2,2,8}};
 //        int[] leaving_cand = find_Negative_Entries(a, 1, 3);
 //        System.out.println(Arrays.toString(leaving_cand));
 //        int[] degen = degenerate_Check(leaving_cand, 3);
@@ -479,9 +481,9 @@ public class simplex {
 //        int[] choice = find_Max(a, degen, 2, 1);
 //        System.out.println(Arrays.toString(choice));
         //System.out.println(-1 <-3.5);
-        System.out.println(lexicographic_Handler(a, 1, 3, 4,null));
+        //System.out.println(lexicographic_Handler(a, 1, 3, 4,null));
 
-        exit(0);
+        //exit(0);
 
         //System.out.println(args.length);
         File inFile = create_File();
@@ -543,21 +545,24 @@ public class simplex {
 
             for(;;){
 
-                entering_var = enter_Select(table);//largest_Coef_Select(table);
+                if(bonus == 1){
+                    entering_var = largest_Coef_Select(table);
+                }else{
+                    entering_var = enter_Select(table);
+                }
 
                 if(entering_var == -1){
                     break;
                 }
 
                 if(bonus == 1){
-                    leaving_var = leave_Select(table, entering_var, rows, row_labels);
-                }else{
                     leaving_var = lexicographic_Handler(table, entering_var, rows, cols, row_labels);
+                }else{
+                    leaving_var = leave_Select(table, entering_var, rows, row_labels);
                 }
 
                 if(leaving_var == -1){
-                    //print_Table(table, row_labels, col_labels, rows);
-                    System.out.println("unbounded");//should it be unbounded or infeasible?
+                    System.out.println("infeasible");//should it be unbounded or infeasible?
                     exit(0);
                 }
 
@@ -595,7 +600,11 @@ public class simplex {
         }
 
         for(;;){
-            entering_var = enter_Select(table);//largest_Coef_Select(table);
+            if(bonus == 1){
+                entering_var = largest_Coef_Select(table);
+            }else{
+                entering_var = enter_Select(table);
+            }
 
             if(entering_var == -1){
                 //System.out.println("\nFinal table");
@@ -603,7 +612,11 @@ public class simplex {
                 break;
             }
 
-            leaving_var = leave_Select(table, entering_var, rows, row_labels);
+            if(bonus == 1){
+                leaving_var = lexicographic_Handler(table, entering_var, rows, cols, row_labels);
+            }else{
+                leaving_var = leave_Select(table, entering_var, rows, row_labels);
+            }
 
             if(leaving_var == -1){
                // print_Table(table, row_labels, col_labels, rows);
