@@ -293,7 +293,7 @@ public class simplex {
 
     public static int special_Select(double[][] table, int leave_var, int num_cols){
         double max = 0;
-        int index = -5;
+        int index = -1;
         for(int y = 1; y < num_cols; y++){
            // System.out.println(table[leave_var][y]);
             if(table[leave_var][y] > max){
@@ -366,7 +366,124 @@ public class simplex {
         return input;
     }
 
+    public static int lexicographic_Select(double[][] table, int enter, int num_rows, String[] row_labels){
+
+        //System.out.println(Arrays.toString(neg_entry));
+        // System.out.println("idx " + idx);
+
+//        if(neg_entry[0] == 0){
+//            return leave;
+//        }
+        return 0;
+    }
+
+    public static int[] find_Negative_Entries(double[][] table, int enter, int num_rows){
+        int[] neg_entry = new int[num_rows];
+        int idx = 0;
+
+        for(int x = 1; x < num_rows; x++){
+            if(table[x][enter] < -1e-7){
+                if(Math.abs(table[x][0]) < 1e-7){
+                    neg_entry[idx] = -x;
+                }else{
+                    neg_entry[idx] = x;
+                }
+                idx++;
+            }
+        }
+        return neg_entry;
+    }
+
+    public static int[] degenerate_Check(int[] leaving_cand, int num_rows){
+        int count = 0;
+        int[] degen_idx = null;
+        int pointer = 0;
+
+        for(int i = 0; i < num_rows; i++){
+            if(leaving_cand[i] < 0){
+                count++;
+            }
+        }
+
+        if(count >= 2){
+            degen_idx = new int[count];
+
+            for(int t = 0; t < num_rows; t++){
+                if(leaving_cand[t] < 0){
+                    degen_idx[pointer++] = -leaving_cand[t];
+                }
+            }
+        }
+        return degen_idx;
+    }
+
+    public static int[] find_Max(double[][] table, int[] degen_cand, int index, int entering_var){
+        double max = -Double.MAX_VALUE;
+        int[] max_cand = null;
+        int max_cand_idx = 0;
+
+        for(int i = 0; i < degen_cand.length; i++){
+            double val = table[degen_cand[i]][index]/table[degen_cand[i]][entering_var];
+            System.out.println(val);
+
+            if(val > max){
+                max = val;
+
+                max_cand = new int[degen_cand.length];
+                max_cand_idx = 0;
+                max_cand[max_cand_idx++] = i;
+            }else if(val == max){
+                max_cand[max_cand_idx++] = i;
+            }
+        }
+        System.out.println(Arrays.toString(max_cand));
+        return max_cand;
+    }
+
+    public static int lexicographic_Handler(double[][] table, int entering_var, int num_rows, int num_cols, String[] row_labels){
+        int[] lexi_choice = null;
+
+        int[] leav_candidates = find_Negative_Entries(table, entering_var, num_rows);
+        if(leav_candidates[0] == 0){
+            return -1;
+        }
+        int[] degen_var = degenerate_Check(leav_candidates, num_rows);
+        if(degen_var == null){
+            return leave_Select(table, entering_var, num_rows, row_labels);
+        }
+        System.out.println(Arrays.toString(degen_var));
+        for(int y = 1; y < num_cols; y++){
+            lexi_choice = find_Max(table, degen_var, y, entering_var);
+            if(lexi_choice[1] == 0){
+                //System.out.println(table[lexi_choice[0]][y]);
+                break;
+            }
+        }
+
+        return degen_var[lexi_choice[0]];
+    }
+
     public static void main(String[] args){
+        int bonus = 0;
+        if(args[0].matches("bonus")){
+            bonus = 1;
+        }
+
+        double[][] a = {{1,-2,3,5},
+                        {0,-2,2,7},
+                        {0,-2,2,8}};
+//        int[] leaving_cand = find_Negative_Entries(a, 1, 3);
+//        System.out.println(Arrays.toString(leaving_cand));
+//        int[] degen = degenerate_Check(leaving_cand, 3);
+//        System.out.println(Arrays.toString(degen));
+//        int[] choice = find_Max(a, degen, 2, 1);
+//        System.out.println(Arrays.toString(choice));
+        //System.out.println(-1 <-3.5);
+        System.out.println(lexicographic_Handler(a, 1, 3, 4,null));
+
+        exit(0);
+
+        //System.out.println(args.length);
         File inFile = create_File();
 
         int rows = row_Count(inFile);
@@ -429,14 +546,14 @@ public class simplex {
                 entering_var = enter_Select(table);//largest_Coef_Select(table);
 
                 if(entering_var == -1){
-                    //System.out.println();
-                   // print_Table(table, row_labels, col_labels, rows);
                     break;
                 }
 
-                leaving_var = leave_Select(table, entering_var, rows, row_labels);
-
-                //System.out.println("entering variable and leaving variable " + entering_var + "    " + leaving_var);
+                if(bonus == 1){
+                    leaving_var = leave_Select(table, entering_var, rows, row_labels);
+                }else{
+                    leaving_var = lexicographic_Handler(table, entering_var, rows, cols, row_labels);
+                }
 
                 if(leaving_var == -1){
                     //print_Table(table, row_labels, col_labels, rows);
@@ -457,6 +574,11 @@ public class simplex {
             int omega_location = find_Omega(row_labels, col_labels, rows, cols);
 
             if(omega_location < 0){
+                if(Math.abs(table[-omega_location][0]) > 1e-7){
+                    System.out.println("infeasible");
+                    exit(0);
+                }
+
                 entering_var = special_Select(table, -omega_location, cols);
                 pivot(table, entering_var, -1 * omega_location, rows, cols, row_labels, col_labels);
                 //print_Table(table, row_labels, col_labels, rows);
