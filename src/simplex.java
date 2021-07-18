@@ -350,7 +350,7 @@ public class simplex {
         return input;
     }
 
-    //find all negative coefficients given an entering variable. if none found, the LP is unbounded
+    //(bonus) find all negative coefficients given an entering variable. if none found, the LP is unbounded
     public static int[] find_Negative_Entries(double[][] table, int enter, int num_rows){
         int[] neg_entry = new int[num_rows];    //list of rows with negative entering variable coefficients
         int idx = 0;
@@ -369,11 +369,13 @@ public class simplex {
         return neg_entry;
     }
 
+    //(bonus) check if dictionary is degenerate
     public static int[] degenerate_Check(int[] leaving_cand, int num_rows){
         int count = 0;
-        int[] degen_idx = null;
+        int[] degen_idx = null; //keep track of degenerate entering variable candidates
         int pointer = 0;
 
+        //count number of degenerate choices from leaving_cand array (leaving variable candidates)
         for(int i = 0; i < num_rows; i++){
             if(leaving_cand[i] < 0){
                 count++;
@@ -385,60 +387,60 @@ public class simplex {
 
             for(int t = 0; t < num_rows; t++){
                 if(leaving_cand[t] < 0){
-                    degen_idx[pointer++] = -leaving_cand[t];
-                }
+                    degen_idx[pointer++] = -leaving_cand[t];    //reverse the negation of the degenerate indices in
+                }                                               //leaving_cand when adding indices to degen_idx
             }
         }
-        return degen_idx;
+        return degen_idx;   //return null if there is less than 2 degenerate candidates
     }
 
+    //(bonus) find lexicographic maximum row for entering variable
     public static int[] find_Max(double[][] table, int[] degen_cand, int index, int entering_var){
         double max = -Double.MAX_VALUE;
         int[] max_cand = null;
         int max_cand_idx = 0;
 
         for(int i = 0; i < degen_cand.length; i++){
-            double val = table[degen_cand[i]][index]/table[degen_cand[i]][entering_var];
-            //System.out.println(val);
+            double val = table[degen_cand[i]][index]/table[degen_cand[i]][entering_var];    //xi coefficient/entering variable coefficient
 
             if(val > max){
                 max = val;
 
-                max_cand = new int[degen_cand.length];
+                max_cand = new int[degen_cand.length];  //initialize array as we can have multiple values with same max value
                 max_cand_idx = 0;
                 max_cand[max_cand_idx++] = i;
             }else if(val == max){
                 max_cand[max_cand_idx++] = i;
             }
         }
-        //System.out.println(Arrays.toString(max_cand));
         return max_cand;
     }
 
+    //(bonus) handles the lexicographic pivot operations
     public static int lexicographic_Handler(double[][] table, int entering_var, int num_rows, int num_cols, String[] row_labels){
-        int[] lexi_choice = null;
+        int[] lexi_choice = null; //lists lexicographic choices for leaving variable. eventually has only one non-zero entry
 
         int[] leav_candidates = find_Negative_Entries(table, entering_var, num_rows);
-        if(leav_candidates[0] == 0){
+        if(leav_candidates[0] == 0){    //array is empty since index zero is not considered, so return -1 for unbounded
             return -1;
         }
-        int[] degen_var = degenerate_Check(leav_candidates, num_rows);
+        int[] degen_var = degenerate_Check(leav_candidates, num_rows);  //lists degenerate entering variables
         if(degen_var == null){
-            return leave_Select(table, entering_var, num_rows, row_labels);
+            return leave_Select(table, entering_var, num_rows, row_labels); //dictionary is not degenerate
         }
-        //System.out.println(Arrays.toString(degen_var));
+        //find lexicographic largest value per component based on entries in degen_var array
         for(int y = 1; y < num_cols; y++){
-            lexi_choice = find_Max(table, degen_var, y, entering_var);
+            lexi_choice = find_Max(table, degen_var, y, entering_var);  //tie, then check next component
             if(lexi_choice[1] == 0){
-                //System.out.println(table[lexi_choice[0]][y]);
-                break;
+                break;  //winner decided (otherwise index 1 would be non-zero, since 0 column is never considered)
             }
         }
-
-        return degen_var[lexi_choice[0]];
-    }
+        return degen_var[lexi_choice[0]]; //lexi_choice is relative to degen_var, degen_var is relative to table
+    }                                     //thus return winning index for table
 
     public static void main(String[] args){
+        //if bonus argument is supplied use largest coefficient entering variable selection and lexicographic leaving variable
+        //selection
         int bonus = 0;
         if(args.length == 1){
             if(args[0].matches("bonus")){
@@ -446,41 +448,21 @@ public class simplex {
             }
         }
 
-//        double[][] a = {{1,-2,3,5},
-//                        {0,-2,2,7},
-//                        {0,-2,2,8}};
-//        int[] leaving_cand = find_Negative_Entries(a, 1, 3);
-//        System.out.println(Arrays.toString(leaving_cand));
-//        int[] degen = degenerate_Check(leaving_cand, 3);
-//        System.out.println(Arrays.toString(degen));
-//        int[] choice = find_Max(a, degen, 2, 1);
-//        System.out.println(Arrays.toString(choice));
-        //System.out.println(-1 <-3.5);
-        //System.out.println(lexicographic_Handler(a, 1, 3, 4,null));
-
-        //exit(0);
-
-        //System.out.println(args.length);
         File inFile = create_File();
 
         int rows = row_Count(inFile);
-        int cols = col_Count(inFile) + 1; //including omega place
+        int cols = col_Count(inFile) + 1; //add 1 for omega entry (coefficients will be zero unless used in aux problem)
 
         int i;
 
         int entering_var;
         int leaving_var;
 
-        //while()
-
-        //System.out.println("Number of rows: " + rows + " Number of columns: " + cols);
-
         double[][] table = new double[rows][];
 
         for(i = 0; i < rows; i++){
-            table[i] = new double[cols]; //
+            table[i] = new double[cols];
         }
-        //System.out.println(table[0][0]);
 
         fill_Table(inFile, table, rows);
 
@@ -490,33 +472,24 @@ public class simplex {
             col_labels[i] = "x" + i;
         }
         col_labels[cols - 1] = "omega";
-        //System.out.println(Arrays.toString(col_labels));
 
         String[] row_labels = new String[rows];
         row_labels[0] = "fi";
         for(i = 1; i < rows; i++){
             row_labels[i] = "w" + i;
         }
-        //System.out.println(Arrays.toString(row_labels));
 
-        //print_Table(table, row_labels, col_labels, rows);
-
+        //check if initially feasible. if not, solve auxiliary problem
         if(check_Feasibility(table, rows) == -1){
             double[] obj_func = new double[cols];
             String[] cur_labels = new String[cols];
-            System.arraycopy(table[0], 0, obj_func, 0, cols);
-            System.arraycopy(col_labels, 0, cur_labels, 0, cols);
+            System.arraycopy(table[0], 0, obj_func, 0, cols);    //copy current objective function
+            System.arraycopy(col_labels, 0, cur_labels, 0, cols);//copy current column labels
 
-            //System.out.println(Arrays.toString(cur_labels));
-            //System.out.println(Arrays.toString(obj_func));
-
-            entering_var = cols - 1;
+            entering_var = cols - 1;    //omega
             leaving_var = auxiliary_Select(table, rows, cols, row_labels, col_labels);
-            //print_Table(table, row_labels, col_labels, rows);
 
             pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
-            //Table(table, row_labels, col_labels, rows);
-            //System.out.println();
 
             for(;;){
 
@@ -526,7 +499,7 @@ public class simplex {
                     entering_var = enter_Select(table);
                 }
 
-                if(entering_var == -1){
+                if(entering_var == -1){ //no more entering variables
                     break;
                 }
 
@@ -537,15 +510,12 @@ public class simplex {
                 }
 
                 if(leaving_var == -1){
-                    System.out.println("infeasible");//should it be unbounded or infeasible?
+                    System.out.println("infeasible");
                     exit(0);
                 }
-
                 pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
             }
 
-            //System.out.println();
-            //print_Table(table, row_labels, col_labels, rows);
             if(Math.abs(table[0][0]) > 1e-7){
                 System.out.println("infeasible");
                 exit(0);
@@ -553,7 +523,7 @@ public class simplex {
 
             int omega_location = find_Omega(row_labels, col_labels, rows, cols);
 
-            if(omega_location < 0){
+            if(omega_location < 0){ //omega is in basis. omega location is a negative index
                 if(Math.abs(table[-omega_location][0]) > 1e-7){
                     System.out.println("infeasible");
                     exit(0);
@@ -564,20 +534,18 @@ public class simplex {
                     System.out.println("infeasible");
                     exit(0);
                 }
-                pivot(table, entering_var, -1 * omega_location, rows, cols, row_labels, col_labels);
-                //print_Table(table, row_labels, col_labels, rows);
+                pivot(table, entering_var, -omega_location, rows, cols, row_labels, col_labels);
                 int new_omega_loc = find_Omega(row_labels, col_labels, rows, cols);
                 delete_Omega(table, new_omega_loc, rows);
             }else{
                 delete_Omega(table, omega_location, rows);
             }
-            //print_Table(table, row_labels, col_labels, rows);
 
             redefine_Obj_Function(table, rows, cols, row_labels, col_labels, cur_labels, obj_func);
-           // print_Table(table, row_labels, col_labels, rows);
-            //exit(0);
         }
+        //auxiliary problem is complete
 
+        //regular simplex method
         for(;;){
             if(bonus == 1){
                 entering_var = largest_Coef_Select(table);
@@ -585,9 +553,7 @@ public class simplex {
                 entering_var = enter_Select(table);
             }
 
-            if(entering_var == -1){
-                //System.out.println("\nFinal table");
-                //print_Table(table, row_labels, col_labels, rows);
+            if(entering_var == -1){ //no more entering variables
                 break;
             }
 
@@ -598,16 +564,12 @@ public class simplex {
             }
 
             if(leaving_var == -1){
-               // print_Table(table, row_labels, col_labels, rows);
                 System.out.println("unbounded");
                 exit(0);
             }
 
-//            System.out.println();
             pivot(table, entering_var, leaving_var, rows, cols, row_labels, col_labels);
-           // print_Table(table, row_labels, col_labels, rows);
         }
-        //print_Table(table, row_labels, col_labels, rows);
-        print_soln(table, row_labels, rows, col_labels, cols);
+        print_soln(table, row_labels, rows, col_labels, cols);  //simplex is complete
     }
 }
