@@ -229,7 +229,7 @@ public class simplex {
         }
     }
 
-    //select leaving variable for aux problem
+    //add omega and select leaving variable for aux problem
     public static int auxiliary_Select(double[][] table, int num_rows, int num_cols, String[] row_labels, String[] col_labels){
         double max = 0;
         int leave = 0;
@@ -251,6 +251,7 @@ public class simplex {
         return leave;
     }
 
+    //redefine obj function after aux problem is solved
     public static void redefine_Obj_Function(double[][] table, int num_rows, int num_cols, String[] row_labels, String[] col_labels,
                                              String[] obj_labels, double[] obj_func){
         int found;
@@ -258,77 +259,73 @@ public class simplex {
         for(int i = 1; i < num_cols - 1; i++) {
             found = 0;
 
+            //check if any variables in original obj function are still in the non-basis
             for (int y = 1; y < num_cols - 1; y++) {
-                if (col_labels[y].matches(obj_labels[i])) {
+                if (col_labels[y].matches(obj_labels[i])) { //if so, add them to current value
                     table[0][y] += obj_func[i];
                     found = 1;
                 }
             }
+            //if a variable is now in the basis, substitute it in
             if(found != 1){
                 for(int x = 1; x < num_rows; x++){
-                    if(row_labels[x].matches(obj_labels[i])){
 
+                    if(row_labels[x].matches(obj_labels[i])){
                         for(int idx = 0; idx < num_cols; idx++){
                             table[0][idx] += obj_func[i] * table[x][idx];
                         }
                     }
                 }
             }
-
         }
     }
 
+    //selects entering variable for the solved aux problem when omega is in the basis
     public static int special_Select(double[][] table, int leave_var, int num_cols){
         double max = 0;
         int index = -1;
         for(int y = 1; y < num_cols; y++){
-           // System.out.println(table[leave_var][y]);
-            if(table[leave_var][y] > max){
-                max = table[leave_var][y];
+            if(table[leave_var][y] > max){  //choose largest coefficient, as otherwise we divide by such a small number
+                max = table[leave_var][y];  //that all the coefficients go to infinity
                 index = y;
             }
         }
         return index;
     }
 
+    //find omega location
     public static int find_Omega(String[] row_labels, String[] col_labels, int num_rows, int num_cols){
         boolean match;
-
-        //System.out.println(Arrays.toString(row_labels));
-        //System.out.println(Arrays.toString(col_labels));
 
         for(int y = 1; y < num_cols; y++) {
             match = col_labels[y].matches("omega");
             if (match) {
-                //System.out.println("non basis");
-                return y;//positive value means it is in non-basis
+                return y;   //positive value means omega is in non-basis
             }
         }
 
         for(int x = 1; x < num_rows; x++) {
             match = row_labels[x].matches("omega");
-            //System.out.println(x + " " + row_labels[x]);
             if (match) {
-                //System.out.println("basis" + x);
-                return -x;//negative value means in basis
+                return -x;  //negative value means omega is in basis
             }
         }
-       // System.out.print("uh ohhhhh");
-        //exit(0);
-        return -1;
+        return -1;  //error, should never get here
     }
 
+    //set omega coefficients to zero
     public static void delete_Omega(double[][] table, int omega_idx, int num_rows){
         for(int x = 0; x < num_rows; x++){
             table[x][omega_idx] = 0;
         }
     }
 
+    //create file from stdin
     public static File create_File(){
         BufferedReader br;
         File input = new File("input.txt");
 
-        int flag = 1;
+        int flag = 1; //used to ensure input is identical to stdin (newlines incl.)
 
         try {
             FileWriter writer = new FileWriter(input);
@@ -353,27 +350,18 @@ public class simplex {
         return input;
     }
 
-    public static int lexicographic_Select(double[][] table, int enter, int num_rows, String[] row_labels){
-
-        //System.out.println(Arrays.toString(neg_entry));
-        // System.out.println("idx " + idx);
-
-//        if(neg_entry[0] == 0){
-//            return leave;
-//        }
-        return 0;
-    }
-
+    //find all negative coefficients given an entering variable. if none found, the LP is unbounded
     public static int[] find_Negative_Entries(double[][] table, int enter, int num_rows){
-        int[] neg_entry = new int[num_rows];
+        int[] neg_entry = new int[num_rows];    //list of rows with negative entering variable coefficients
         int idx = 0;
 
+        //find negative coefficients and check for degeneracy
         for(int x = 1; x < num_rows; x++){
-            if(table[x][enter] < -1e-7){
+            if(table[x][enter] < -1e-7){    //check if coefficient is negative (-1e-7 operates as zero)
                 if(Math.abs(table[x][0]) < 1e-7){
-                    neg_entry[idx] = -x;
+                    neg_entry[idx] = -x;    //degenerate row, symbolize with negation of index
                 }else{
-                    neg_entry[idx] = x;
+                    neg_entry[idx] = x;     //non-degenerate
                 }
                 idx++;
             }
@@ -572,6 +560,10 @@ public class simplex {
                 }
 
                 entering_var = special_Select(table, -omega_location, cols);
+                if(entering_var == -1){
+                    System.out.println("infeasible");
+                    exit(0);
+                }
                 pivot(table, entering_var, -1 * omega_location, rows, cols, row_labels, col_labels);
                 //print_Table(table, row_labels, col_labels, rows);
                 int new_omega_loc = find_Omega(row_labels, col_labels, rows, cols);
