@@ -1,13 +1,12 @@
+// By Lucas J. Antonsen, V00923982
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 
 import static java.lang.System.exit;
 
 public class simplex {
-    //check it works on linux csc!!!!!!!!!
-    //make sure it runs from standard input!!!!!!!!!!!!!
 
+    //create a table based on the input
     public static void fill_Table(File input, double[][] table, int num_rows) {
         int row = 0;
 
@@ -17,16 +16,16 @@ public class simplex {
                 String line = reader.readLine();
                 String[] str = line.split("\\s+");
 
-                if(row == 0){
+                if(row == 0){   //treat the objective row differently. set obj val to zero
                     table[0][0] = 0;
                     for(int i = 0; i < str.length; i++){
                         table[row][i + 1] = Double.parseDouble(str[i]);
                     }
 
                 }else {
-                    table[row][0] = Double.parseDouble(str[str.length - 1]);
+                    table[row][0] = Double.parseDouble(str[str.length - 1]); //set constant first
 
-                    for (int i = 0; i < str.length - 1; i++) {
+                    for (int i = 0; i < str.length - 1; i++) {  //set regular coefficients
                         if(Double.parseDouble(str[i]) != 0){
                             table[row][i + 1] = -1 * Double.parseDouble(str[i]);
                         }
@@ -39,6 +38,7 @@ public class simplex {
         }
     }
 
+    //count rows of file
     public static int row_Count(File input){
         int num_rows = 0;
 
@@ -49,12 +49,12 @@ public class simplex {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //System.out.println("num rows: " + num_rows);
         return num_rows;
     }
 
+    //count columns of file
     public static int col_Count(File input){
-        int num_cols = 1;
+        int num_cols = 1; //initialize count to 1 as the first row is missing a column present in all other rows
 
         try (BufferedReader reader = new BufferedReader(new FileReader(input))) {
             String s = reader.readLine();
@@ -63,20 +63,20 @@ public class simplex {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //System.out.println("num cols: " + num_cols);
         return num_cols;
     }
 
+    //print the raw table
     public static void print_Table(double[][] table, String[] row_labels, String[] col_labels, int num_rows){
         for(int i = 0; i < num_rows; i++){
             System.out.print(row_labels[i] + " = ");
             for(int y = 0; y < table[i].length; y++){
                 if(y == 0){
-                    System.out.print(table[i][y] + " + ");
+                    System.out.print(table[i][y] + " + "); //constants
                 }else if(y == table[i].length - 1){
-                    System.out.print(table[i][y] + col_labels[y]);
+                    System.out.print(table[i][y] + col_labels[y]); //last column entry
                 }else{
-                    System.out.print(table[i][y] + col_labels[y] + " + ");
+                    System.out.print(table[i][y] + col_labels[y] + " + "); //regular column entry
                 }
             }
             System.out.println();
@@ -84,17 +84,19 @@ public class simplex {
         System.out.println();
     }
 
+    //select entering variable via Bland's rule
     public static int enter_Select(double[][] table){
-        int idx = -1;
+        int idx = -1; //no entering variable then return -1
         for(int y = 1; y < table[0].length; y++){
-            if(table[0][y] > 0){
+            if(table[0][y] > 0){    //select the first positive value
                 idx = y;
                 break;
             }
         }
-        return idx;
+        return idx; //return column index of entering variable
     }
 
+    //(bonus) select entering variable based on largest coefficient
     public static int largest_Coef_Select(double[][] table){
         int idx = -1;
         double max = 0;
@@ -105,95 +107,76 @@ public class simplex {
                 break;
             }
         }
-        return idx;
+        return idx; //return column index of entering variable
     }
 
-    //bounds
+    //select leaving variable based on entering variable
     public static int leave_Select(double[][] table, int enter, int num_rows, String[] row_labels){
         double min;
-        int leave = -1;
+        int leave = -1; //if no leaving variable is found -1 is returned, as the LP is unbounded
         double val;
-        int[] neg_entry = new int[num_rows];
+        int[] neg_entry = new int[num_rows]; //keeps track of all rows with negative entries for entering variable
         int idx = 0;
 
         for(int x = 1; x < num_rows; x++){
-            if(table[x][enter] < -1e-7){
-                neg_entry[idx] = x;
+            if(table[x][enter] < -1e-7){    //-1e-7 is our epsilon value, operates basically as zero to remove entries
+                neg_entry[idx] = x;         //such as 1e-17, etc. (very close to zero)
                 idx++;
             }
         }
-        //System.out.println(Arrays.toString(neg_entry));
-       // System.out.println("idx " + idx);
 
-        if(neg_entry[0] == 0){
-            return leave;
+        if(neg_entry[0] == 0){  //since we begin at row 1, it is impossible to get 0 as the first entry here unless
+            return leave;       //there are no possible leaving variables to select
         }
 
-        min = table[neg_entry[0]][0]/(-1*table[neg_entry[0]][enter]);
-        //System.out.println("min " + min);
-        leave = neg_entry[0];
+        min = table[neg_entry[0]][0]/(-1*table[neg_entry[0]][enter]);   //initialize min. xi <= row constant/xi coefficient
+        leave = neg_entry[0];   //initialize leave variable index
 
         for(int i = 1; i < idx; i++){
             val = table[neg_entry[i]][0]/(-1*table[neg_entry[i]][enter]);
-            //System.out.println("val " + val);
-            if(val < min || val == min && row_labels[neg_entry[i]].matches("omega")){
-                min = val;
-                leave = neg_entry[i];
+            if(val < min || val == min && row_labels[neg_entry[i]].matches("omega")){ //if there is a tie between omega
+                min = val;                                                                  //in the aux problem and another
+                leave = neg_entry[i];                                                       //leaving variable then omega wins
             }
         }
-
         return leave;
     }
 
+    //perform pivot operation based on entering and leaving variables
     public static void pivot(double[][] table, int enter_var, int leave_var, int num_rows, int num_cols,
                              String[] row_labels, String[] col_labels){
 
-        double multiplier = -1 * table[leave_var][enter_var];
+        //update values in leaving row first
+        double multiplier = -1 * table[leave_var][enter_var];   //the positive coefficient of the leaving variable's entering variable
         for(int y = 0; y < num_cols; y++){
             if(y != enter_var){
-                table[leave_var][y] /= multiplier;
-
-//                if(Math.abs(table[leave_var][y]) < .0000000001){
-//                    table[leave_var][y] = 0;
-//                }
-
+                table[leave_var][y] /= multiplier;  //divide by multiplier for non-entering variable
             }else{
-                table[leave_var][enter_var] = -1 / multiplier;
-
-//                if(Math.abs(table[leave_var][enter_var]) < .000000001){
-//                    table[leave_var][enter_var] = 0;
-//                }
-            }
+                table[leave_var][y] = -1 / multiplier;  //move row variable to entering variable position
+            }                                           //and divided by multiplier
         }
 
+        //update all other rows
         for(int x = 0; x < num_rows; x++) {
             if (x != leave_var) {
-
-                multiplier = table[x][enter_var];
+                multiplier = table[x][enter_var];   //multiplier for given entering variable
 
                 for (int y = 0; y < num_cols; y++) {
                     if(y != enter_var){
-                        //System.out.println("x: " + x + " y: " + y + " factor: " + multiplier + "*" + table[leave_var][y]);
-                        table[x][y] += multiplier * table[leave_var][y];
-
-//                        if(Math.abs(table[x][y]) < .000000000001){//5 zeroes is pretty good, 6 zeroes is bad, 4 zeroes is bad infeasible
-//                            table[x][y] = 0;
-//                        }
+                        table[x][y] += multiplier * table[leave_var][y];    //add to non-entering variables in given row
 
                     }else{
-                        table[x][y] = multiplier * table[leave_var][y];
-
-//                        if(Math.abs(table[x][y]) < .00000000001){
-//                            table[x][y] = 0;
-//                        }
+                        table[x][y] = multiplier * table[leave_var][y];     //revise entering variable as leaving variable
                     }
                 }
             }
         }
+        //swap labels of entering and leaving variables
         String copy = row_labels[leave_var];
         row_labels[leave_var] = col_labels[enter_var];
         col_labels[enter_var] = copy;
     }
+
 
     public static int check_Feasibility(double[][] table, int num_rows){
         for(int x = 1; x < num_rows; x++){
