@@ -177,34 +177,37 @@ public class simplex {
         col_labels[enter_var] = copy;
     }
 
-
+    //check the feasibility of the LP initially
     public static int check_Feasibility(double[][] table, int num_rows){
         for(int x = 1; x < num_rows; x++){
             if(table[x][0] < 0){
-                return -1;
+                return -1;  //negative constant present
             }
         }
-        return 1;
+        return 1;   //no negative constants
     }
 
+    //prints solution with minimum 7 significant figures
     public static void print_soln(double[][] table, String[] row_labels, int num_rows, String[] col_labels, int num_cols){
-        int[] x_indices = new int[num_cols - 2]; //-2 for omega and obs
+        int[] x_indices = new int[num_cols - 2]; //list of x indices {x1, x2, x3,...}. size is num_cols - 2 for omega and obs
         int index;
 
+        //find all x variables in row_labels. start at 1 since obj label is not considered
+        //index is label subscript - 1 since x_indices are {x1, x2, x3, x4,...}
         for(int x = 1; x < num_rows; x++){
-            if(row_labels[x].matches("^x\\d+")){
+            if(row_labels[x].matches("^x\\d+")) {
                 index = Integer.parseInt(row_labels[x].replaceAll("[^0-9]", "")) - 1;
-                x_indices[index] = x;
-            }
+                x_indices[index] = x;   //element xi is present at index x. for instance, if we found x11 at row 7 then
+            }                           //x_indices[10] = 7 (index - 1 = 11 -1)
         }
 
+        //find all x variables in col_labels. start at 1 since obj function is not considered
         for(int y = 1; y < num_cols; y++){
             if(col_labels[y].matches("^x\\d+")){
                 index = Integer.parseInt(col_labels[y].replaceAll("[^0-9]", "")) - 1;
-                x_indices[index] = -y;
-            }
+                x_indices[index] = -y;  //set the location index (y) of element xi to a negative since it is non-basic
+            }                           //and we want to differentiate it (since it will be zero)
         }
-        //System.out.println(Arrays.toString(x_indices));
 
         System.out.println("optimal");
 
@@ -213,37 +216,38 @@ public class simplex {
         System.out.print(format.format(table[0][0]) + "\n");
         for(int i = 0; i < x_indices.length; i++){
             if(x_indices[i] < 0){
-                System.out.print(0 + " ");
+                if(i == x_indices.length - 1){
+                    System.out.print(0);    //non-basic xn
+                }else{
+                    System.out.print(0 + " ");  //non-basic xi, print zero
+                }
             }else if(i == x_indices.length - 1) {
-                System.out.print(format.format(table[x_indices[i]][0]));
+                System.out.print(format.format(table[x_indices[i]][0]));    //basic xn
             }else{
-                System.out.print(format.format(table[x_indices[i]][0]) + " ");
+                System.out.print(format.format(table[x_indices[i]][0]) + " "); //basic xi
             }
         }
-        //System.out.printf(format.format(3000000.12356788));
     }
 
+    //select leaving variable for aux problem
     public static int auxiliary_Select(double[][] table, int num_rows, int num_cols, String[] row_labels, String[] col_labels){
         double max = 0;
         int leave = 0;
 
+        //overwrite objective function with fi = 0 -omega
         for(int y = 0; y < num_cols - 1; y++){
             table[0][y] = 0;
         }
-        table[0][num_cols - 1] = -1;
+        table[0][num_cols - 1] = -1; //num_cols - 1 is index of omega
 
         for(int x = 1; x < num_rows; x++){
-            table[x][num_cols - 1] = 1;
+            table[x][num_cols - 1] = 1; //add omega to each non-objective row
 
-            if(table[x][0] < 0 && max < -1 * table[x][0]){
-                max = -1 * table[x][0];
+            if(table[x][0] < 0 && max < -1 * table[x][0]){  //while were looking at this row, check if row has smallest constant
+                max = -1 * table[x][0];                     //return index of row with smallest constant
                 leave = x;
             }
         }
-        //System.out.println(leave + " " + max);
-
-        //print_Table(table, row_labels, col_labels, num_rows);
-        //System.out.println();
         return leave;
     }
 
