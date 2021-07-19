@@ -222,9 +222,9 @@ public class simplex {
                     System.out.print(0 + " ");  //non-basic xi, print zero
                 }
             }else if(i == x_indices.length - 1) {
-                System.out.print(format.format(table[x_indices[i]][0]));    //basic xn
+                System.out.print(format.format(Math.abs(table[x_indices[i]][0])));    //basic xn, absolute used to remove cases like -1e-17
             }else{
-                System.out.print(format.format(table[x_indices[i]][0]) + " "); //basic xi
+                System.out.print(format.format(Math.abs(table[x_indices[i]][0])) + " "); //basic xi
             }
         }
     }
@@ -345,7 +345,7 @@ public class simplex {
             writer.close();
         }
         catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
         return input;
     }
@@ -394,31 +394,31 @@ public class simplex {
         return degen_idx;   //return null if there is less than 2 degenerate candidates
     }
 
-    //(bonus) find lexicographic maximum row for entering variable
-    public static int[] find_Max(double[][] table, int[] degen_cand, int index, int entering_var){
-        double max = -Double.MAX_VALUE;
-        int[] max_cand = null;
-        int max_cand_idx = 0;
+    //(bonus) find lexicographic minimum row for entering variable
+    public static int[] find_Min(double[][] table, int[] degen_cand, int index, int entering_var){
+        double min = Double.MAX_VALUE;
+        int[] min_cand = {0};
+        int min_cand_idx = 0;
 
         for(int i = 0; i < degen_cand.length; i++){
             double val = table[degen_cand[i]][index]/table[degen_cand[i]][entering_var];    //xi coefficient/entering variable coefficient
 
-            if(val > max){
-                max = val;
+            if(val < min){
+                min = val;
 
-                max_cand = new int[degen_cand.length];  //initialize array as we can have multiple values with same max value
-                max_cand_idx = 0;
-                max_cand[max_cand_idx++] = i;
-            }else if(val == max){
-                max_cand[max_cand_idx++] = i;
+                min_cand = new int[degen_cand.length];  //initialize array as we can have multiple values with same min value
+                min_cand_idx = 0;
+                min_cand[min_cand_idx++] = i;
+            }else if(val == min){
+                min_cand[min_cand_idx++] = i;
             }
         }
-        return max_cand;
+        return min_cand;
     }
 
     //(bonus) handles the lexicographic pivot operations
     public static int lexicographic_Handler(double[][] table, int entering_var, int num_rows, int num_cols, String[] row_labels){
-        int[] lexi_choice = null; //lists lexicographic choices for leaving variable. eventually has only one non-zero entry
+        int[] lexi_choice = {0}; //lists lexicographic choices for leaving variable. eventually has only one non-zero entry
 
         int[] leav_candidates = find_Negative_Entries(table, entering_var, num_rows);
         if(leav_candidates[0] == 0){    //array is empty since index zero is not considered, so return -1 for unbounded
@@ -428,9 +428,9 @@ public class simplex {
         if(degen_var == null){
             return leave_Select(table, entering_var, num_rows, row_labels); //dictionary is not degenerate
         }
-        //find lexicographic largest value per component based on entries in degen_var array
+        //find lexicographic smallest value based on entries in degen_var array
         for(int y = 1; y < num_cols; y++){
-            lexi_choice = find_Max(table, degen_var, y, entering_var);  //tie, then check next component
+            lexi_choice = find_Min(table, degen_var, y, entering_var);  //tie, then check next component
             if(lexi_choice[1] == 0){
                 break;  //winner decided (otherwise index 1 would be non-zero, since 0 column is never considered)
             }

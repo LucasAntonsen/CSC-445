@@ -97,15 +97,22 @@ example, it is zero. Omega is used in the auxiliary problem.
 **Bonus: Alternate Cycling Avoidance**
 
 Using the performance oriented pivoting method, the Largest Coefficient Rule, in 
-conjunction with the lexicographic method enables a fast and cycle free simplex method.
+conjunction with the Lexicographic Method enables a fast and cycle free simplex method.
 
 The lexicographic method is used in cases of degenerate dictionaries and compares 
 degenerate leaving variables vector-wise. For instance, the vector (0, 2, 1) >L 
 (0, 1, 1) since 2 > 1.
 
-The bonus follows uses the lexicographic comparison method outlined in: 
+The bonus follows the lexicographic comparison method outlined in: 
 https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-251j-introduction-to-mathematical-programming-fall-2009/lecture-notes/MIT6_251JF09_lec06.pdf.
 
 This method selects the entering variable in a degenerate dictionary by the smallest 
 lexicographic vector (row).
 
+If the argument bonus is supplied, the program uses `largest_Coef_Select()` to select the entering 
+variable and `lexicographic_Handler()` to select the leaving variable.
+
+In `lexicographic_Handler()`, the program checks if the dictionary is degenerate using 
+`degenerate_Check()`. If the dictionary is not degenerate, it performs the normal leaving variable 
+selection method `leave_Select()`, otherwise, it uses the `find_Min()` function to find the 
+lexicographic minimum row and this row is used as the leaving variable.
