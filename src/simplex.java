@@ -222,11 +222,12 @@ public class simplex {
                     System.out.print(0 + " ");  //non-basic xi, print zero
                 }
             }else if(i == x_indices.length - 1) {
-                System.out.print(format.format(Math.abs(table[x_indices[i]][0])));    //basic xn, absolute used to remove cases like -1e-17
+                System.out.print(format.format(Math.abs(table[x_indices[i]][0])));    //basic xn, absolute used to remove cases like -1e-17 = -0
             }else{
                 System.out.print(format.format(Math.abs(table[x_indices[i]][0])) + " "); //basic xi
             }
         }
+        System.out.println();
     }
 
     //add omega and select leaving variable for aux problem
