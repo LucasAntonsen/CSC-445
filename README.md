@@ -1,6 +1,6 @@
 Linear Programming Project  
 ---
-##### By Lucas J. Antonsen, V00923982
+##### By Lucas J. Antonsen
 
 #### How to Run
 

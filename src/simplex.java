@@ -1,4 +1,4 @@
-// By Lucas J. Antonsen, V00923982
+// By Lucas J. Antonsen
 import java.io.*;
 import java.text.DecimalFormat;
 
