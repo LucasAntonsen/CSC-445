@@ -18,10 +18,12 @@ $w_{1}$&nbsp; $=$ &nbsp; $1$ &nbsp; &nbsp; $+$ &nbsp; $2x$ &nbsp; $-$ &nbsp; &nb
 $w_{2}$&nbsp; $=$ &nbsp; $8$ &nbsp; &nbsp; $-$ &nbsp; &nbsp; $x$ &nbsp; $-$ &nbsp; $3y$  
 $w_{3}$&nbsp; $=$ &nbsp; $12$ &nbsp; $-$ &nbsp; $3x$ &nbsp; $-$ &nbsp; &nbsp; $y$  
 
-And uses the dictionary to perform operations that rearranges the variables and equations such that $\zeta$ is maximized like so:
+And uses the dictionary to perform operations that rearranges the basic variables (rows of the dictionary below $\zeta$) and non-basic variables (columns of dictionary, ie. $x,y$) such that $\zeta$ is maximized like so:
 
 $\zeta~$ &nbsp; $=$ &nbsp; &nbsp; $5$ &nbsp; &nbsp; $-$ &nbsp; &nbsp; $\frac{1}{4}w_{2}$ &nbsp; &nbsp; $-$ &nbsp; &nbsp; $\frac{1}{4}w_{3}$  
-<ins>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </ins>  
+<ins>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </ins>  
 $w_{1}$&nbsp; $=$ &nbsp; $\frac{13}{2}$&nbsp; &nbsp; $+$ &nbsp; &nbsp; $\frac{5}{8}w_{2}$ &nbsp; &nbsp; $-$ &nbsp; &nbsp; $\frac{7}{8}w_{3}$  
 $y$ &nbsp; &nbsp; $=$ &nbsp; $\frac{3}{2}$ &nbsp; &nbsp; $-$ &nbsp; &nbsp; $\frac{3}{8}w_{2}$ &nbsp; &nbsp; $+$ &nbsp; &nbsp; $\frac{1}{8}w_{3}$  
 $x$ &nbsp; &nbsp; $=$ &nbsp; $\frac{7}{2}$ &nbsp; &nbsp; $+$ &nbsp; &nbsp; $\frac{1}{8}w_{2}$ &nbsp; &nbsp; $-$ &nbsp; &nbsp; $\frac{3}{8}w_{3}$
+
+As a part of the Simplex Method, the non-basic variables are set to $0$, thus $\zeta = 5$, $w_{1} = \frac{13}{2}$, $w_{2} = w_{3} = 0$, $y = \frac{3}{2}$ and $x = \frac{7}{2}$.
