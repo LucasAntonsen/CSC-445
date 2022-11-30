@@ -1,6 +1,6 @@
 # Simplex Method Solver
 
-In the UVic course, CSC 445: Operations Research: Linear Programming, I developed the program _simplex.java_ for solving a linear program.
+In the UVic course, **CSC 445: Operations Research: Linear Programming**, I developed the program **_simplex.java_** for solving a linear program.
 
 In brief, the program takes a linear program like so:
 
@@ -28,5 +28,10 @@ $w_{1}$&nbsp; $=$ &nbsp; $\frac{13}{2}$&nbsp; &nbsp; $+$ &nbsp; &nbsp; $\frac{5}
 $y$ &nbsp; &nbsp; $=$ &nbsp; $\frac{3}{2}$ &nbsp; &nbsp; $-$ &nbsp; &nbsp; $\frac{3}{8}w_{2}$ &nbsp; &nbsp; $+$ &nbsp; &nbsp; $\frac{1}{8}w_{3}$  
 $x$ &nbsp; &nbsp; $=$ &nbsp; $\frac{7}{2}$ &nbsp; &nbsp; $+$ &nbsp; &nbsp; $\frac{1}{8}w_{2}$ &nbsp; &nbsp; $-$ &nbsp; &nbsp; $\frac{3}{8}w_{3}$
 
-Since the non-basic variables are all being subtracted in $\zeta$, the maximum value they can have is $0$ from above, thus $\zeta = 5$, $w_{1} = \frac{13}{2}$, $w_{2} = w_{3} = 0$, $y = \frac{3}{2}$ and $x = \frac{7}{2}$.
+Since the non-basic variables are all subtracted in $\zeta$, the maximum value they can have is $0$ given above, thus $\zeta = 5$, $w_{1} = \frac{13}{2}$, $w_{2} = w_{3} = 0$, $y = \frac{3}{2}$ and $x = \frac{7}{2}$.
 
+The program tests the following before running the procedure above:
+
+**Feasibility:** The program ensures that all linear programs are feasible, meaning that no basic variable is less than $0$. If the program is initially infeasible, an auxiliary problem is solved using the Simplex Method to assert whether the linear program can be manipulated such that it becomes feasible.
+
+**Unboundedness:** The program ensures that the linear program is not unbounded, ie. that $\zeta$ cannot increase indefinitely through the Simplex Method.
