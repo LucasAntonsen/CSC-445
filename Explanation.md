@@ -13,6 +13,8 @@ s.t.&nbsp; &nbsp; $-2x$ &nbsp; $+$ &nbsp; &nbsp; $y$ &nbsp; $\le$ &nbsp; $1$
 Converts it into a dictionary:
 
 $\zeta~$ &nbsp; $=$ &nbsp; $0$ &nbsp; &nbsp; $+$ &nbsp; &nbsp; $x$ &nbsp; $+$ &nbsp; &nbsp; $y$  
+<ins>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </ins>  
 $w_{1}$&nbsp; $=$ &nbsp; $1$ &nbsp; &nbsp; $+$ &nbsp; $2x$ &nbsp; $-$ &nbsp; &nbsp; $y$  
 $w_{2}$&nbsp; $=$ &nbsp; $8$ &nbsp; &nbsp; $-$ &nbsp; &nbsp; $x$ &nbsp; $-$ &nbsp; $3y$  
 $w_{3}$&nbsp; $=$ &nbsp; $12$ &nbsp; $-$ &nbsp; $3x$ &nbsp; $-$ &nbsp; &nbsp; $y$  
+
